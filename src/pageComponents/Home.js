@@ -10,6 +10,12 @@ const Home = () => {
   // initial state for results
   const [results, setResults] = useState(null);
 
+  // initial state for search options (i.e., either shows or people)
+  const [searchOption, setSearchOption] = useState('shows');
+
+  // boolean const to keep track if the search made is for 'shows' or 'people'
+  const isShowsSearch = searchOption === 'shows';
+
   // function to take action when a text is typed in the input box (like onChange)
   // it's called wby the onChange() function of the input field
   const onInputChange = event => {
@@ -21,7 +27,7 @@ const Home = () => {
   // function to make an API request for the text search
   const onSearch = () => {
     // calling apiGet() function to perform a http fetch API request to get results
-    apiGet(`/search/shows?q=${input}`).then(result => {
+    apiGet(`/search/${searchOption}?q=${input}`).then(result => {
       // updating state of results
       setResults(result);
     });
@@ -35,24 +41,29 @@ const Home = () => {
     }
   };
 
+  // function to search for shows or people based on the radio button selected
+  const onRadioChange = event => {
+    // updating state of searchOption (based on the radio button selected)
+    setSearchOption(event.target.value); // value is either 'shows' or 'people'
+  };
+
   // function to return results
   const renderResults = () => {
     if (results && results.length === 0) {
       return <div>No results found</div>;
     }
     if (results && results.length > 0) {
-      return (
-        <div>
-          {results.map(item => (
-            <div key={item.show.id}> {item.show.name} </div>
-          ))}
-        </div>
-      );
+      return results[0].show
+        ? results.map(item => <div key={item.show.id}>{item.show.name}</div>)
+        : results.map(item => (
+            <div key={item.person.id}>{item.person.name}</div>
+          ));
     }
 
     return null;
   };
 
+  // return page layout
   return (
     <MainPageLayout>
       <input
@@ -60,7 +71,32 @@ const Home = () => {
         onChange={onInputChange}
         onKeyDown={onKeyDown}
         value={input}
+        placeholder={isShowsSearch ? 'Search for shows' : 'Search for people'}
       />
+
+      <div>
+        <label htmlFor="shows-search">
+          Shows
+          <input
+            id="shows-search"
+            type="radio"
+            value="shows"
+            checked={isShowsSearch}
+            onChange={onRadioChange}
+          />
+        </label>
+
+        <label htmlFor="actors-search">
+          Actors
+          <input
+            id="actors-search"
+            type="radio"
+            value="people"
+            checked={!isShowsSearch}
+            onChange={onRadioChange}
+          />
+        </label>
+      </div>
       <button type="button" onClick={onSearch}>
         Search
       </button>
