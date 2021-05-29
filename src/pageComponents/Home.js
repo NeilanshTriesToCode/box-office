@@ -1,10 +1,14 @@
 // React Component for homepage of the app
 import React, { useState } from 'react';
 import MainPageLayout from '../components/MainPageLayout';
+import { apiGet } from '../misc/config'; // user-defined function
 
 const Home = () => {
-  // state for input
+  // initial state for input
   const [input, setInput] = useState('');
+
+  // initial state for results
+  const [results, setResults] = useState(null);
 
   // function to take action when a text is typed in the input box (like onChange)
   // it's called wby the onChange() function of the input field
@@ -16,13 +20,11 @@ const Home = () => {
 
   // function to make an API request for the text search
   const onSearch = () => {
-    // https://api.tvmaze.com/search/shows?q=g
-    // calling the fetch() function to make a HTTP request
-    fetch(`https://api.tvmaze.com/search/shows?q=${input}`)
-      .then(r => r.json())
-      .then(result => {
-        console.log(result[0].show.name);
-      });
+    // calling apiGet() function to perform a http fetch API request to get results
+    apiGet(`/search/shows?q=${input}`).then(result => {
+      // updating state of results
+      setResults(result);
+    });
   };
 
   // function to make search even when the user presses "Enter" on the keyboard
@@ -31,6 +33,24 @@ const Home = () => {
       // keyCode for "Enter" is 13
       onSearch(); // call search function
     }
+  };
+
+  // function to return results
+  const renderResults = () => {
+    if (results && results.length === 0) {
+      return <div>No results found</div>;
+    }
+    if (results && results.length > 0) {
+      return (
+        <div>
+          {results.map(item => (
+            <div key={item.show.id}> {item.show.name} </div>
+          ))}
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -44,6 +64,7 @@ const Home = () => {
       <button type="button" onClick={onSearch}>
         Search
       </button>
+      {renderResults()}
     </MainPageLayout>
   );
 };
