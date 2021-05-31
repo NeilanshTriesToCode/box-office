@@ -9,6 +9,12 @@ const Show = () => {
   // initial state for show info
   const [show, setShow] = useState(null);
 
+  // initial state for loading information
+  const [isLoading, setIsLoading] = useState(true); // true since info starts loading when page is loading
+
+  // initial state for errors that might occur while loading results
+  const [error, setError] = useState(null);
+
   // the useEffect() hook is used to access the stages between the lifecycles of the Components.
   /*
     - takes 2 args: 
@@ -19,11 +25,37 @@ const Show = () => {
       cleanup function.
   */
   useEffect(() => {
+    // variable to state whether the Component is mounted or not
+    let isMounted = true;
+
     // retrieving the TV show's main info
-    apiGet(`/shows/${id}?embed[]=seasons&embed[]=cast`).then(showInfo => {
-      setShow(showInfo);
-    });
+    apiGet(`/shows/${id}?embed[]=seasons&embed[]=cast`)
+      .then(showInfo => {
+        if (isMounted) {
+          setShow(showInfo);
+          setIsLoading(false); // when results have loaded successfully
+        }
+      })
+      .catch(err => {
+        if (isMounted) {
+          setError(err.message); // set error message
+          setIsLoading(false);
+        }
+      });
+
+    // cleanup function
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
+
+  if (isLoading) {
+    return <div>Loading results...</div>;
+  }
+  if (error) {
+    return <div>An error occured: {error}</div>;
+  }
+
   return <div>this is the show page</div>;
 };
 
