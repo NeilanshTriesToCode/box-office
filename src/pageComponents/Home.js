@@ -1,9 +1,9 @@
 // React Component for homepage of the app
 import React, { useState } from 'react';
-import ActorGrid from '../actor/ActorGrid';
+import ActorGrid from '../components/actor/ActorGrid';
 import MainPageLayout from '../components/MainPageLayout';
 import { apiGet } from '../misc/config'; // user-defined function
-import ShowGrid from '../show/ShowGrid';
+import ShowGrid from '../components/show/ShowGrid';
 
 const Home = () => {
   // initial state for input
