@@ -1,19 +1,50 @@
 // React Component for page showing TV Show info
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { useParams } from 'react-router-dom';
 import { apiGet } from '../misc/config';
+
+// reducer function for userReducer() hook
+/* takes 2 args:
+   1. prevState: previous state
+   2. action: a user-defined object defining action types and data
+*/
+const reducer = (prevState, action) => {
+  // defining actions
+  switch (action.type) {
+    case 'FETCH_SUCCESS': {
+      // in case data from the API has been fetched successfully
+      return { isLoading: false, error: null, show: action.show };
+    }
+    case 'FETCH_FAILED': {
+      return { ...prevState, isLoading: false, error: action.error };
+    }
+
+    default:
+      return prevState;
+  }
+};
+
+// initial states to be used for useReducer
+const initialState = {
+  show: null,
+  isLoading: true,
+  error: null,
+};
 
 const Show = () => {
   const { id } = useParams(); // to get id of the show from the page URL
 
-  // initial state for show info
-  const [show, setShow] = useState(null);
-
-  // initial state for loading information
-  const [isLoading, setIsLoading] = useState(true); // true since info starts loading when page is loading
-
-  // initial state for errors that might occur while loading results
-  const [error, setError] = useState(null);
+  /* useReducer() hook:
+      1. Works like useState(), but is used for managing states of complex types such as objects.
+      2. Takes 2 args: 
+         - reducer(prevState, action): a function that manipulates the prevState based on the "action" required
+         - initialState: object consisting of variables/data whose states are to be changed
+  */
+  // using the useReducer() hook to manage states of the variables being used
+  const [{ show, isLoading, error }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
 
   // the useEffect() hook is used to access the stages between the lifecycles of the Components.
   /*
@@ -32,14 +63,12 @@ const Show = () => {
     apiGet(`/shows/${id}?embed[]=seasons&embed[]=cast`)
       .then(showInfo => {
         if (isMounted) {
-          setShow(showInfo);
-          setIsLoading(false); // when results have loaded successfully
+          dispatch({ type: 'FETCH_SUCCESS', show: showInfo }); // when results have loaded successfully
         }
       })
       .catch(err => {
         if (isMounted) {
-          setError(err.message); // set error message
-          setIsLoading(false);
+          dispatch({ type: 'FETCH_FAILED', error: err.message }); // if fetch fails
         }
       });
 
