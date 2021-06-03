@@ -54,12 +54,13 @@ const Show = () => {
   );
 
   // the useEffect() hook is used to access the stages between the lifecycles of the Components.
+  // It executes whenever the state of any of the elements inside the dependency array changes.
   /*
     - takes 2 args: 
-    1. a callback function that executes whenever any of the element inside the dependency array changes.
+    1. a callback function that executes whenever the state of any element inside the dependency array changes.
     2. dependency array: array of items that could change. 
     - the callback function sent to the useEffect() hook returns a "cleanup" function which always executes 
-      before the execution of the callback function. the ComponentWillUnmount lifecyvle can be achieved through the 
+      before the execution of the callback function. the ComponentWillUnmount lifecycle can be achieved through the 
       cleanup function.
   */
   useEffect(() => {
