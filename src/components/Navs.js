@@ -1,6 +1,7 @@
 // React Component to list down a nav-bar directing to different pages of the app
 import React from 'react';
-import { Link } from 'react-router-dom'; // wrapper around the HTML <a> tag (to use <a> tag in react-router)
+import { Link, useLocation } from 'react-router-dom'; // wrapper around the HTML <a> tag (to use <a> tag in react-router)
+import { NavList, LinkStyled } from './Navs.styled';
 
 // const array to contain link paths
 const LINKS = [
@@ -9,15 +10,25 @@ const LINKS = [
 ];
 
 const Navs = () => {
+  // React hook from react-router-dom to tell what page the user is currently at
+  const location = useLocation();
+  // "location" is an object. One of its members is "pathname" which tells what page we're on.
+  // for eg. if we're on the "starred" page, the value of "pathname" would be "/starred"
+
   return (
     <div>
-      <ul>
+      <NavList>
         {LINKS.map(item => (
           <li key={item.to}>
-            <Link to={item.to}>{item.linkName}</Link>
+            <LinkStyled
+              to={item.to}
+              className={item.to === location.pathname ? 'active' : ''}
+            >
+              {item.linkName}
+            </LinkStyled>
           </li>
         ))}
-      </ul>
+      </NavList>
     </div>
   );
 };
