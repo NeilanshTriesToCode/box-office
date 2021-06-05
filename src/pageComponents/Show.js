@@ -1,90 +1,20 @@
 /* eslint-disable no-underscore-dangle */
 // React Component for page showing TV Show info
-import React, { useEffect, useReducer } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { apiGet } from '../misc/config';
 
 import ShowMainData from '../components/show/ShowMainData';
 import Details from '../components/show/Details';
 import Seasons from '../components/show/Seasons';
 import Cast from '../components/show/Cast';
 import { InfoBlock, ShowPageWrapper } from './Show.styled';
-
-// reducer function for userReducer() hook
-/* takes 2 args:
-   1. prevState: previous state
-   2. action: a user-defined object defining action types and data
-*/
-const reducer = (prevState, action) => {
-  // defining actions
-  switch (action.type) {
-    case 'FETCH_SUCCESS': {
-      // in case data from the API has been fetched successfully
-      return { isLoading: false, error: null, show: action.show };
-    }
-    case 'FETCH_FAILED': {
-      return { ...prevState, isLoading: false, error: action.error };
-    }
-
-    default:
-      return prevState;
-  }
-};
-
-// initial states to be used for useReducer
-const initialState = {
-  show: null,
-  isLoading: true,
-  error: null,
-};
+import { useShow } from '../misc/custom-hooks';
 
 const Show = () => {
   const { id } = useParams(); // to get id of the show from the page URL
 
-  /* useReducer() hook:
-      1. Works like useState(), but is used for managing states of complex types such as objects.
-      2. Takes 2 args: 
-         - reducer(prevState, action): a function that manipulates the prevState based on the "action" required
-         - initialState: object consisting of variables/data whose states are to be changed
-  */
-  // using the useReducer() hook to manage states of the variables being used
-  const [{ show, isLoading, error }, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
-
-  // the useEffect() hook is used to access the stages between the lifecycles of the Components.
-  // It executes whenever the state of any of the elements inside the dependency array changes.
-  /*
-    - takes 2 args: 
-    1. a callback function that executes whenever the state of any element inside the dependency array changes.
-    2. dependency array: array of items that could change. 
-    - the callback function sent to the useEffect() hook returns a "cleanup" function which always executes 
-      before the execution of the callback function. the ComponentWillUnmount lifecycle can be achieved through the 
-      cleanup function.
-  */
-  useEffect(() => {
-    // variable to state whether the Component is mounted or not
-    let isMounted = true;
-
-    // retrieving the TV show's main info
-    apiGet(`/shows/${id}?embed[]=seasons&embed[]=cast`)
-      .then(showInfo => {
-        if (isMounted) {
-          dispatch({ type: 'FETCH_SUCCESS', show: showInfo }); // when results have loaded successfully
-        }
-      })
-      .catch(err => {
-        if (isMounted) {
-          dispatch({ type: 'FETCH_FAILED', error: err.message }); // if fetch fails
-        }
-      });
-
-    // cleanup function
-    return () => {
-      isMounted = false;
-    };
-  }, [id]);
+  // using custom-hook
+  const { show, isLoading, error } = useShow(id);
 
   if (isLoading) {
     return <div>Loading results...</div>;

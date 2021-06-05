@@ -4,10 +4,11 @@ import ActorGrid from '../components/actor/ActorGrid';
 import MainPageLayout from '../components/MainPageLayout';
 import { apiGet } from '../misc/config'; // user-defined function
 import ShowGrid from '../components/show/ShowGrid';
+import { useLastQuery } from '../misc/custom-hooks';
 
 const Home = () => {
-  // initial state for input
-  const [input, setInput] = useState('');
+  // using custom-hook to mantain state of the search input
+  const [input, setInput] = useLastQuery();
 
   // initial state for results
   const [results, setResults] = useState(null);
