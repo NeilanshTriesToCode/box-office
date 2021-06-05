@@ -1,8 +1,9 @@
 // file for styled components
 import styled from 'styled-components';
+import FadeIn from 'react-fade-in'; // fade-in animation
 
 // styled-component which acts as a wrapper around another element/component
-export const FlexGrid = styled.div`
+export const FlexGrid = styled(FadeIn)`
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
