@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 // React Component for business logic of shows being displayed on the app
-import React from 'react';
+import React, { useCallback } from 'react';
 import ShowCard from './ShowCard';
 
 import IMG_NOT_FOUND from '../../images/not-found.png';
@@ -17,13 +18,13 @@ const ShowGrid = ({ data }) => {
         const isStarred = starredShows.includes(show.id);
 
         // function to STAR or unSTAR a show (to be sent as a prop to ShowCard.js)
-        const onStarClick = () => {
+        const onStarClick = useCallback(() => {
           if (isStarred) {
             despatchStarred({ type: 'REMOVE', showId: show.id }); // remove (unSTAR) the show
           } else {
             despatchStarred({ type: 'ADD', showId: show.id }); // add (STAR) the show
           }
-        };
+        }, [isStarred, show.id]);
 
         return (
           <ShowCard

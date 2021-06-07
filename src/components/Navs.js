@@ -1,6 +1,6 @@
 // React Component to list down a nav-bar directing to different pages of the app
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom'; // wrapper around the HTML <a> tag (to use <a> tag in react-router)
+import React, { memo } from 'react';
+import { useLocation } from 'react-router-dom'; // wrapper around the HTML <a> tag (to use <a> tag in react-router)
 import { NavList, LinkStyled } from './Navs.styled';
 
 // const array to contain link paths
@@ -33,4 +33,4 @@ const Navs = () => {
   );
 };
 
-export default Navs;
+export default memo(Navs);

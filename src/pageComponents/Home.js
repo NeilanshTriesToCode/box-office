@@ -1,16 +1,32 @@
 // React Component for homepage of the app
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import ActorGrid from '../components/actor/ActorGrid';
 import MainPageLayout from '../components/MainPageLayout';
 import { apiGet } from '../misc/config'; // user-defined function
 import ShowGrid from '../components/show/ShowGrid';
-import { useLastQuery } from '../misc/custom-hooks';
+import { useLastQuery, useWhyDidYouUpdate } from '../misc/custom-hooks';
 import {
   RadioInputsWrapper,
   SearchButtonWrapper,
   SearchInput,
 } from './Home.styled';
 import CustomRadio from '../components/CustomRadio';
+
+// function to return results
+const renderResults = results => {
+  if (results && results.length === 0) {
+    return <div>No results found</div>;
+  }
+  if (results && results.length > 0) {
+    return results[0].show ? (
+      <ShowGrid data={results} />
+    ) : (
+      <ActorGrid data={results} />
+    );
+  }
+
+  return null;
+};
 
 const Home = () => {
   // using custom-hook to mantain state of the search input
@@ -27,11 +43,15 @@ const Home = () => {
 
   // function to take action when a text is typed in the input box (like onChange)
   // it's called wby the onChange() function of the input field
-  const onInputChange = event => {
-    // the text entered in the text-box can be found using event.target.box
-    // update state
-    setInput(event.target.value);
-  };
+  // wrapping the useCallback() hook around it
+  const onInputChange = useCallback(
+    event => {
+      // the text entered in the text-box can be found using event.target.box
+      // update state
+      setInput(event.target.value);
+    },
+    [setInput]
+  );
 
   // function to make an API request for the text search
   const onSearch = () => {
@@ -43,6 +63,7 @@ const Home = () => {
   };
 
   // function to make search even when the user presses "Enter" on the keyboard
+  // wrapping the useCallback() hook around it
   const onKeyDown = event => {
     if (event.keyCode === 13) {
       // keyCode for "Enter" is 13
@@ -50,27 +71,29 @@ const Home = () => {
     }
   };
 
+  // using useWhyDidYouUpdate custom-hook (borrowed from the internet)
+  /* - It keeps track of props whose states change, which causes Component re-rendering
+     - We can't keep track of state changes of props such as the setInput() function 
+       so useWhyDidYouUpdate helps us with that.
+     - Takes 2 args:
+        1. text for the console.log to print in case of state change of prop(s).
+        2. object containing list of functions which use the prop(s).
+  */
+  // useWhyDidYouUpdate('home', { onInputChange, onKeyDown });
+
   // function to search for shows or people based on the radio button selected
-  const onRadioChange = event => {
+  // the useCallback() hook is wrapped around the onRadioChange() function
+  // useCallback() hook prevents the creation of separate copies of the same function during re-rendering.
+  // so a new copy of onRadioChange() won't be created everytime the Home Component is re-rendered.
+  /* useCallback() takes 2 args:
+      1. the function which is not supposed to be created everytime on re-rendering.
+      2. dependency array: a new copy of the function would be created if any of the element 
+         inside the dependency array changes. 
+  */
+  const onRadioChange = useCallback(event => {
     // updating state of searchOption (based on the radio button selected)
     setSearchOption(event.target.value); // value is either 'shows' or 'people'
-  };
-
-  // function to return results
-  const renderResults = () => {
-    if (results && results.length === 0) {
-      return <div>No results found</div>;
-    }
-    if (results && results.length > 0) {
-      return results[0].show ? (
-        <ShowGrid data={results} />
-      ) : (
-        <ActorGrid data={results} />
-      );
-    }
-
-    return null;
-  };
+  }, []);
 
   // return page layout
   return (
@@ -108,7 +131,7 @@ const Home = () => {
           Search
         </button>
       </SearchButtonWrapper>
-      {renderResults()}
+      {renderResults(results)}
     </MainPageLayout>
   );
 };

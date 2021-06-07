@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 // JS file containing user-defined hooks
-import { useState, useReducer, useEffect } from 'react';
+import { useState, useReducer, useEffect, useRef, useCallback } from 'react';
 
 import { apiGet } from './config';
 
@@ -74,15 +75,19 @@ export function useLastQuery(key = 'lastQuery') {
   // whatever has been entered in the search bar has to be stored in the sessionStorage
   // however, setInput() function doesn't do that, it only changes the state of input
   // so we create another function to save the search input in the sessionStorage
-  const setPersistedInput = newState => {
-    // newState is the search input entered in the search bar
+  // wrapping it around the useCallback() hook to prevent a new copy of the function being created everytime
+  const setPersistedInput = useCallback(
+    newState => {
+      // newState is the search input entered in the search bar
 
-    // call setInput to update state
-    setInput(newState);
+      // call setInput to update state
+      setInput(newState);
 
-    // store newState in the sessionStorage
-    sessionStorage.setItem(key, JSON.stringify(newState));
-  };
+      // store newState in the sessionStorage
+      sessionStorage.setItem(key, JSON.stringify(newState));
+    },
+    [key]
+  );
 
   return [input, setPersistedInput];
 }
@@ -156,4 +161,35 @@ export function useShow(showId) {
   }, [showId]);
 
   return state;
+}
+
+export function useWhyDidYouUpdate(name, props) {
+  // Get a mutable ref object where we can store props ...
+  // ... for comparison next time this hook runs.
+  const previousProps = useRef();
+  useEffect(() => {
+    if (previousProps.current) {
+      // Get all keys from previous and current props
+      const allKeys = Object.keys({ ...previousProps.current, ...props });
+      // Use this object to keep track of changed props
+      const changesObj = {};
+      // Iterate through keys
+      allKeys.forEach(key => {
+        // If previous is different from current
+        if (previousProps.current[key] !== props[key]) {
+          // Add to changesObj
+          changesObj[key] = {
+            from: previousProps.current[key],
+            to: props[key],
+          };
+        }
+      });
+      // If changesObj not empty then output to console
+      if (Object.keys(changesObj).length) {
+        console.log('[why-did-you-update]', name, changesObj);
+      }
+    }
+    // Finally update previousProps with current props for next hook call
+    previousProps.current = props;
+  });
 }
